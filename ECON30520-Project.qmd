@@ -1,0 +1,468 @@
+---
+title: "The Determinants of Economics Students' Final Score"
+author: "Ronan Moran"
+format: html
+editor: visual
+bibliography: references.bib
+---
+
+## 1. Introduction
+
+```{r, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(modelsummary)
+library(GGally)
+library(ggfortify)
+library(wooldridge)
+
+library(readr)
+econ_test <- read_csv("~/R for economists/econ_test.csv")
+```
+
+The intention of this journal entry is to find the determinants of Students' final exam scores within the field of economics. It has been found that the biggest contributors to Students final exam scores are College GPA, high school GPA and ACT composite scores while factors such as gender, attendance and parental education played an insignificant role in contributing to student's final exam scores.
+
+This paper is split into 3 main parts; Variable insight, which includes a summary of variables and R functions used for the reader to gain an intuition of the raw data. Next is our regression section, where OLS methods and GAMs were used to determine the associated effects of each variable on the dependent variable. Finally is a section dedicated to machine learning, where the function random forests was used to determine the importance of the various variables used in this study.
+
+From conducting scholarly research, it was apparent that Gender, high school GPA and education level of the parents were seen as the main contributing factors to exam score (@turkey) . This paper seeks to investigate the validity of this claim through various regression methods.
+
+## 2. Variable insight
+
+### 2.1 Variables and R functions
+
+The data was attained from an anonymous college in the United States. There are 856 observations total, with 17 variables. The variables collected are described in the [list of variables](#list){#list}. The column 'Variable code' describes the code which was assigned to each variable, which will correspond with each beta value in our @tbl-regressions. The variable description clarifies the detail of the variable, and the variable type briefly describes the role of the variable in the study. Our variable of interest, i.e. the dependent variable of the study is 'score'. Below, @tbl-custom-2 lists the mean, standard deviation (SD), the minimum value, the median value, and the max value of each of the variables in the data set. It also has a histogram assigned to each variable which shows the distribution of the sample relative to each variable. In @tbl-custom-2, the variables econhs, male, calculus, attexc, attgood, fathcoll, mothcoll were all left out as because they are binary variables, the information displayed would be less insightful. @tbl-correlation is a list of correlation coefficients with the intention of challenging intuition before regressing with the data. @fig-patchwork is a collection a graphs plotting each binary variable against the final score of economics students. Finally, @fig-mutate graphs 'attbad', a newly created variable (which is explained below), against the final score.
+
+| Variable code | Variable description | Variable type |
+|----|----|----|
+| age | Age in years | Independent, Continuous |
+| work | Hours worked per week | Independent, Continuous |
+| study | Hours studying per week | Independent, Continuous |
+| econhs | If the student did economics in high school | Independent, Factor; 'Yes' indicates the student did economics in high school |
+| colgpa | Student's college GPA at the beginning of the semester | Independent, Ordinal; 0-4 |
+| hsgpa | Student's high school GPA | Independent, Ordinal; 0-4 |
+| acteng | Student's ACT English score | Independent, Ordinal; 1-36 |
+| actmth | ACT math score | Independent, Ordinal; 1-36 |
+| act | Student's composite ACT score | Independent, Ordinal; 1-36 |
+| mathscr | Student's score on a math quiz | Independent, Ordinal; 0-10 |
+| male | Gender of the student | Independent, Factor; 'male' indicates the participant is male, 'Female' indicates participant is female |
+| calculus | If the student had taken a calculus course | Independent, Factor; 'Yes' indicates the participant took a calculus course |
+| attexc | If the student's attendance was excellent | Independent, Factor; 'Yes' indicates the participants attendance was excellent |
+| attgood | If the student's past attendance was good | Independent, Factor; 'Yes' indicates the participants attendance was good |
+| fathcoll | If the student's father had a bachelors degree | Independent, Factor; 'Yes' indicates that the participants father had a bachelors degree |
+| mothcoll | If student's mother had a bachelors degree | Independent, Factor; 'Yes' indicates that the participants mother had a bachelors degree |
+| score | Course score | Dependent, Ordinal; 0-100, in percent. |
+| attbad | Student's attendance was less than 'good' | Independent, Factor; Yes indicates attendance was neither 'good' nor 'excellent' |
+
+: List of variables {#list}.
+
+The R function 'dplyr' was used in our study to tidy our data. The 'mutate' function was used to convert binary variables into factor variables. The purpose of this is to improve interpretation by preventing R from treating it as a continuous numeric variable, instead treating it as a categorical variable where one level (e.g. 'Yes') becomes the reference level, and the coefficient represents the effect of the other level, relative to the reference. Dplyr was also used to arrange the data so that 'score', our variable of interest, appears first. Again, it was used to filter our the binary variables from appearing on our summary table. A new variable called 'attbad', using the mutate function, was created, which indicates the student's attendance was neither good nor excellent. This was done by assigning a 'yes' value if both 'attexc' and 'attgood' had a 'No' value. The purpose of this variable was to reveal how students with worse attendance than 'good' did on their final scores. Dplyr was also used to remove any rows with 'NA' values in order to keep our data consistent and usable with R functions.
+
+### 2.2 Tables and graphs
+
+```{r}
+#| echo: false
+#| tbl-cap:  "Data summary table"
+#| label: tbl-custom-2
+
+econ_test <- econ_test %>%
+  mutate(
+    econhs = factor(econhs, levels = c(0, 1), labels = c("No", "Yes")),
+    male = factor(male, levels = c(0, 1), labels = c("Female", "Male")),
+    calculus = factor(calculus, levels = c(0, 1), labels = c("No", "Yes")),
+    attexc = factor(attexc, levels = c(0, 1), labels = c("No", "Yes")),
+    attgood = factor(attgood, levels = c(0, 1), labels = c("No", "Yes")),
+    fathcoll = factor(fathcoll, levels = c(0, 1), labels = c("No", "Yes")),
+    mothcoll = factor(mothcoll, levels = c(0, 1), labels = c("No", "Yes"))
+  )
+
+
+arranged_data <- econ_test %>% 
+  relocate(score, .before = everything())
+
+filtered_data <- econ_test %>% 
+  select(-c(econhs, male, calculus, attexc, attgood, fathcoll, mothcoll))
+
+datasummary_skim(filtered_data,histogram = T)
+```
+
+The summary table provides an overview of the key statistics for the variables in the dataset. The ages of participants range from 18 to 29 years, with a mean age of 19.4 and a relatively small standard deviation (SD) of 0.9, indicating most participants are close to the average age. Hours worked per week vary significantly, ranging from 0 to 37.5 hours, with a mean of 8.6 hours and a high SD of 9.2, suggesting substantial variation in work hours. Study hours per week range from 0 to 50, with a mean of 13.9 and an SD of 7.8. The wide range and higher SD indicate diverse study habits among participants. College GPAs range from 0.9 to 4.0, with a mean of 2.8 and a low SD of 0.5, showing that most GPAs cluster near the mean. High school GPAs range from 2.4 to 4.3, with a mean of 3.3 and an SD of 0.3, indicating less variability than college GPA. ACT English scores range from 12 to 34, with a mean of 22.6 and an SD of 3.8, reflecting moderate variability in English performance. ACT Math scores range from 12 to 36, with a mean of 23.2 and an SD of 3.8, suggesting a similar variability as ACT English scores. Composite ACT scores range from 13 to 33, with a mean of 23.1 and an SD of 3.3, indicating consistent performance across participants. Math quiz scores range from 0 to 10, with a mean of 7.9 and an SD of 1.7, showing relatively high performance on the math quiz. Final course scores range widely, from 19.5 to 98.4, with a mean of 72.6 and an SD of 13.4, indicating significant variability in overall course performance. The histograms visually summarize the distribution of each variable, showing that variables like age, colgpa, and hsgpa are tightly clustered, while others like work and study exhibit a wider spread.
+
+```{r, warning=FALSE}
+#| echo: false
+#| tbl-cap: "Correlation between variables"
+#| label: tbl-correlation
+
+ggpairs(arranged_data ,  
+        columns= c(1:4,6:10),
+        aes(alpha=0.10),
+        lower=list(continuous="smooth")) 
+```
+
+@tbl-correlation displays the correlation coefficients and also shows scatter plots (lower triangle) and density plots (diagonal) for each pair of variables. The scatter plots illustrate how the variables relate to one another visually: for instance, we can see an upward “cloud” of points between final exam score and college GPA, consistent with their relatively strong positive correlation of 0.57. A similar upward trend is evident between final exam score and ACT math (r = 0.41) and between final exam score and ACT composite (r = 0.39). Meanwhile, variables like age display a weaker (and slightly negative) relationship with the final exam score, reflected by a fairly diffuse cloud of points and a small correlation (–0.07).\
+\
+The density plots on the diagonal show how each variable is distributed overall. For example, final exam scores appear roughly unimodal (slightly skewed), while college GPA, ACT math, and ACT composite each cluster around a particular central value with varying spreads. In short, these visual patterns reinforce our numeric correlations: higher GPAs and stronger ACT scores tend to line up with higher final exam scores in economics. The regression analysis below will test whether these relationships hold once other factors are accounted for.
+
+```{r, echo=FALSE, warning=FALSE}
+#| fig-cap: "Graph of factor variables"
+#| label: fig-patchwork
+
+library(patchwork)
+
+binary_vars <- c("econhs", "male", "calculus", "attexc", "attgood", "fathcoll", "mothcoll")
+
+variable_labels <- c(
+  econhs = "High School Economics",
+  male = "Gender",
+  calculus = "'Took Calculus?'",
+  attexc = "Attendance: Excellent?",
+  attgood = "Attendance: Good?",
+  fathcoll = "If Father has BA",
+  mothcoll = "If Mother has BA"
+)
+
+
+plots <- lapply(binary_vars, function(var) {
+  ggplot(econ_test, aes_string(x = var, y = "score")) +
+    geom_jitter(width = 0.2, fill = "lightblue", color = "darkblue", size = 0.5, alpha = 0.7) +
+    labs(
+      title = paste("Score vs", variable_labels[[var]]), # Use descriptive label
+      x = variable_labels[[var]], # X-axis label
+      y = "Final Score (%)" # Y-axis label
+    ) +
+    theme_classic(base_size = 10) + 
+    theme(
+      plot.title = element_text(size = 10, face = "bold", hjust = 0.5), 
+      axis.title = element_text(size = 8), # Axis title size
+      axis.text = element_text(size = 6) # Axis text size
+    )
+})
+
+
+combined_plot <- wrap_plots(plots, ncol = 2) 
+combined_plot
+
+```
+
+The above graphs were created seeking to gain clarity on the relationship between each of the variables and final economics exam scores. Across all plots, there appears to be no substantial difference in the distribution of scores between the 'no' and 'yes' categories. All show similar spreads and central tendencies. This suggests minimal or no strong relationship with scores. These graphs imply that the variables investigated may not be strong predictors of student performance. Further statistical testing via regression analysis is required to verify these claims.
+
+```{r, echo=FALSE}
+#| fig-cap: "Graph of 'attbad'"
+#| label: fig-mutate
+
+
+econ_test <- econ_test %>%
+  mutate(
+    attbad = ifelse(attgood == "No" & attexc == "No", "Yes", "No"),
+    attbad = factor(attbad, levels = c("No", "Yes"))
+  )
+
+
+econ_test %>%
+  ggplot(aes(x = attbad, y = score, fill = attbad)) +
+  geom_boxplot(alpha = 0.8, outlier.color = "red", outlier.shape = 16) +
+  scale_fill_manual(values = c("No" = "skyblue", "Yes" = "tomato")) +
+  labs(
+    title = "Distribution of Scores by Attendance Quality",
+    subtitle = "Comparing the impact of attendance quality on final scores",
+    x = "Was attendance worse than 'good'?",
+    y = "Final Score (%)",
+    caption = "Data Source: Economics Department"
+  ) +
+  theme_classic() +
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, face = "italic", hjust = 0.5),
+    axis.title = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 10),
+    legend.position = "none"
+  )
+```
+
+@fig-mutate visualises the relationship between the factor variable that was created, 'attbad' and the dependent variable 'score'. 'No' indicates students whose attendance was at least 'good' while 'yes' indicates the student's attendance was at least worse than 'good'. The Y-axis represents our 'score' variable. The median, which is the horizontal line in the box, is slightly higher for students with 'bad' attendance. This suggests that, on average, students with bad attendance have a slightly higher score. It should be noted however, that the difference does not appear to be dramatic. The interquartile range, i.e. the height of the box, is slightly narrower for students with bad attendance. This suggests there is more variability in students with good or excellent attendance, however, this could be due to the sample size being smaller in those with 'bad' attendance. For students with 'good' or better attendance, there are several outliers below the 40% mark, meaning some students who had good or better attendance still performed poorly on their final economics exams. This plot challenges the intuitive assumption that bad attendance automatically lead to worse scores on exams. As we can see, the difference is slight. 'attbad' will be included in a regression to investigate the implications of this plot.
+
+```{r, include=FALSE}
+
+clean_econ_test <- econ_test %>% 
+  filter(!is.na(acteng))
+
+```
+
+## 3. Regressions and analysis
+
+### 3.1 Regression Methods
+
+In this section our chosen regression method is ordinary least squares (OLS). This method seeks to find the effect of the independent variable, denoted as 'beta', by minimizing the sum of squared residuals.
+
+In matrix form, the OLS estimate is:
+
+$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
+$$
+
+where:
+
+-   $\mathbf{X}$ is the design matrix of predictors,
+
+-   $\mathbf{y}$ is the vector of outcomes,
+
+-   $\hat{\boldsymbol{\beta}}$ is the vector of estimated coefficients.
+
+An important assumption of OLS to note:
+
+$$
+x_j, \mu = 0 
+$$ where:
+
+-   $x_j$ represents the $j$-th predictor,
+
+-   $\mu$ is the error term,
+
+-   $\mathbb{E}[\mu \mid X] = 0$ means the error term has a mean of zero given the predictors.
+
+This means our Beta term and dependent variable must not both be correlated with our error term, or our correlation coefficients will be 'biased' meaning, on average, our coefficients will be incorrect. By satisfying this assumption, we ensure that our betas show the accurate effect on the dependent variable on average.
+
+The predicted value of $Y$, denoted as $\hat{y}$, is calculated as:
+
+$\hat{y} = \hat{\alpha} + \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \dots + \hat{\beta}_k x_k +\mu$
+
+-   $\hat{\mathbf{y}}$: Vector of predicted values,
+
+-   $\mathbf{X}$: Design matrix of predictors,
+
+-   $\hat{\boldsymbol{\beta}}$: Vector of estimated regression coefficients.
+
+-   $\boldsymbol{\mu}$: Vector of error terms.
+
+Using this method, we will be able to speculate the associated effect of beta on our dependent variable on average.
+
+The method of selecting variables for the regression used was adding each variable one by one. If the $R^2$ value decreased, it meant the model was a worse fit of the data, and it was removed. The variables left out from this method were; age, attexc, attgood, fathcoll, mothcoll, attbad. 'attmath' and 'atteng' were also left out in order to avoid multicollinearity, which would cause our model to lose predictive value. These variables were removed because they were highly correlated with 'act' which is a function of both of these, and other scores.
+
+### 3.2 Regressions and Interpretations
+
+```{r}
+#| echo: false
+#| tbl-cap:  "Regressions"
+#| label: tbl-regressions
+
+
+reg1 <- lm(score ~ colgpa , data = clean_econ_test )
+
+reg2 <- lm(score ~ colgpa+ hsgpa , data = clean_econ_test )
+
+reg3 <- lm(score~ colgpa+ hsgpa +male , data = clean_econ_test)
+
+reg4 <- lm(score ~colgpa+ hsgpa +male +study , data = clean_econ_test )
+
+reg5 <- lm(score ~colgpa+ hsgpa +male +study +work, data = clean_econ_test )
+
+reg6 <-lm(score ~colgpa+ hsgpa +male +study +work +act , data = clean_econ_test )
+
+reg7 <- lm(score~colgpa+ hsgpa +male +study +work +act + mathscr , data = clean_econ_test)
+
+reg8 <- lm(score~colgpa+ hsgpa +male +study +work +act +mathscr +calculus , data = clean_econ_test)
+
+var_names = c('colgpa' = 'College GPA',
+              'hsgpa' = 'HS GPA',
+              'maleMale' = 'Gender(male)',
+              'study' = 'Hours Studied P/W',
+              'work' = 'Hours Worked P/W',
+              'act' = 'Act Composite Score',
+              'mathscr' = 'Math score',
+              'calculusYes' = 'Taken calculus? (Yes)',
+              'econhsYes' = 'If taken Economics in HS',
+              'age' = 'Age of Student',
+              'acteng' = 'ACT English Score',
+              'actmth' = 'ACT Math Score',
+              'attexcYes' = 'If attendance was excellent ',
+              'attgoodYes' = 'If attendance was good',
+              'fathcollYes' = 'If father has a BA',
+              'mothcollYes' = 'If Mother has a BA',
+              'attbad' = 'If attendance was worse than "good"')
+
+
+mods=list("College GPA" =reg1, "Add HS GPA"=reg2, "Add Gender"=reg3,"Add Hours studied"=reg4,"Add hours worked"=reg5,"Add ACT Score"=reg6,"Add Math Score"=reg7,"Add If Calculus Taken"=reg8)
+modelsummary(mods,
+             coef_map = var_names,
+             stars = TRUE,
+             notes = "Standard Errors are in parentheses. Logs not applicable to our data. Gender coefficient is true when gender = male. Calculus variable is true if student has taken calculus.",
+             gof_omit = 'Log.Lik|BIC|F|RMSE')
+
+
+
+```
+
+@tbl-regressions show the results of several OLS regression. College GPA has a consistently strong positive association with final scores across all of the models. A one unit increase in college GPA is associated with an increase of 11.3 points, average, in exam scores when controlling for other variables. This coefficient is significant at the 99% level. This indicates that college academic performance is a critical determinant of success in economics exams.
+
+High school GPA also displays a positive relationship with final exam score. A one unit increase in High School GPA is associated with an increase of 5.3 points, on average, in exam scores when only College GPA is included in the regression. Interestingly, adding gender, hours studied and hours worked to this regression increases this coefficient to 6.4 points on average, indicating that these variables are negatively correlated with each other. Then, adding ACT score, math score and if the student took calculus brings the coefficient down to 3.1 points on average, indicating that these variables are positively correlated with each other. Although, this is only significant at the 90% level.
+
+The variable 'Gender' indicates that being male is associated with an increase in final score of 2.5 points, on average, compared to females when all other variables are controlled for. This is statistically significant at the 99% confidence level.
+
+Hours studied per week show no statistically significant relationship with final scores, as the coefficient is near zero across all models.
+
+Hours worked per week have a significant negative relationship with exam scores. A one-hour increase in work is associated with a decrease in exam scores by .13 points on average when controlling for all other variables. This suggests that work commitments hinder academic performance.
+
+Math score shows a weak coefficient; a one unit increase in math score is associated with a an increase in final exam score of .57 on average when controlling for all variables except the calculus variable. In this regression, it is significant at the 90% level. However, when controlling for if the student has taken calculus, this associated effect becomes weaker and loses statistical significance.
+
+Students who took calculus are associated with an increased score of 3.76 points on average than those who did not, with a significance level at 99%.
+
+The R squared and adjusted R squares values increase as more variables are added, suggesting that the model improved in fit and that no unnecessary variables were added. The final value is .423, meaning the model explains 42.3% of the variance in final exam scores.
+
+```{r, echo=FALSE}
+#| fig-cap: "Model plot of Regressions so far"
+#| label: fig-modelplot1
+
+modelplot(mods,
+          coef_map = var_names,
+          coef_omit = "(Intercept)")+
+  theme_bw()+
+  labs(title="Comparative Visualisation of Beta Effects")
+```
+
+@fig-modelplot1 summarises the coefficients relative to one another. It also displays their 95% confidence intervals, allowing us to compare how the inclusion of different variables affects the estimated effects of predictors on economic student's final exam scores.
+
+Our main takeaway from these regressions are; Academic preparations such as college GPA, HS GPA, ACT composite score and calculus high indicators of exam performance. External factors like work commitments are associated with negative impacts on performance. Non-significant variables like hours studied per week warrant further investigation to understand their role in this data set.
+
+### 3.3 Regression Diagnostics
+
+@fig-diagplot below assess the assumptions of a linear regression model. Each plot assesses the model's performance and whether key assumptions are violated.
+
+```{r, echo=FALSE}
+#| fig-cap: "Diagnostic plots"
+#| label: fig-diagplot
+
+library(ggfortify)
+
+autoplot(reg7)+
+  theme_bw( base_size = 14)
+
+
+
+```
+
+The purpose of the residuals vs fitted plot (top left) is to check for non-linearity and constant variance, or homoskedasticity. The residuals are scattered around zero, however there is a slight curved pattern in the residuals indicating possible non-linearity in the relationship between predictors and the outcome. The spread of residuals is quite even, suggesting no strong evidence of heteroskedasticity (non constant variance).
+
+The purpose of the normal q-q plot (top right) is to check whether the residuals follow a normal distribution. Most points lie close to the diagonal line, suggesting that residuals are normal. There are some deviations at the tails, particularly observation 293, which may indicate potential outliers.
+
+The purpose of the scale-location plot is to check for homoskedasticity. The trend line is relatively and the spread of the points appears fairly consistent across fitted values. However, the downward slope of the trend line suggests a slight decrease in variance as fitted values increase, indicating mild heteroskedasticity.
+
+The residuals vs Leverage plot (bottom left) identifies influential points. Most point have low leverage, as indicated by their clustering near the left side of the plot. Observation 293 has higher leverage and could potentially be an influential point. Its standardised residual does not appear extreme, however, so its influence may be limited.
+
+From our findings we can conclude that the linearity assumption may be slightly violated due to the curve in the residuals vs fitted plot. There also may be mild heterskedasticity, but no severe violations. This means our coefficients may be slightly wrong.
+
+Observation 293 is removed from the model in @fig-diagplot2 to analyse the difference to determine its effect.
+
+A general additive model is applies in @fig-regressionsGAM to address the possible non-linearity of our OLS regression.
+
+```{r, include = FALSE}
+
+glimpse(clean_econ_test %>% slice(293))
+```
+
+```{r, echo=FALSE}
+#| tbl-cap:  "Regressions with and without leverage point"
+#| label: tbl-regressions2
+
+reg9 <- lm(score~colgpa+ hsgpa +male +study +work +act +mathscr +calculus , data = clean_econ_test %>% slice(-293))
+modelsummary(list("Highest leveredge point left in"= reg8,
+                  "Leveredge point taken out"=reg9),
+             coef_map = var_names,
+             stars = TRUE,
+             notes = "Standard Errors are in parentheses. Logs not applicable to our data. Gender coefficient is true when gender = male. Calculus variable is true if student has taken calculus.",
+             gof_omit = 'Log.Lik|AIC|BIC|F|RMSE')
+```
+
+```{r, echo=FALSE}
+#| fig-cap: "Diagnostic plots with and without leverage point"
+#| label: fig-diagplot2
+
+modelplot(list("Highest leveredge point left in"= reg8,
+                  "Leveredge point taken out"=reg9),
+          coef_map = var_names,
+          coef_omit = "(Intercept)")+
+  theme_bw()+
+  labs(title="Beta effects; With Leveredge point vs Without")
+```
+
+From @tbl-regressions2 we can see that the variables has slight change when taking out observation 293. However, as we can see from @fig-diagplot2 the difference is mild and does not effect the overall takeaway of the regression.
+
+```{r, include=FALSE}
+library(mgcv)
+```
+
+```{r, echo=FALSE, warning=FALSE}
+#| fig-cap:  "GAM regression smooth terms"
+#| label: fig-regressionsGAM
+
+
+gam_model <- gam(score ~ s(colgpa) + s(hsgpa) + s(study) + s(work) + male + s(act) + mathscr + calculus, 
+                 data = clean_econ_test, 
+                 family = gaussian())
+
+
+
+plot(gam_model, pages = 1)
+```
+
+@fig-regressionsGAM shows partial effect plots. They display the relationship between the predictors ( 'colgpa', 'hsgpa', 'study' , 'work', 'act') and the dependent variable. The plots show how each predictor contributes to the dependent variable while allowing for non-linear relationships.
+
+The effect of college GPA is non-linear and strongly positive. As college GPA increases, the smooth effect increases substantially. This indicates that higher college GPAs are strongly associated with better exam scores.
+
+The effect of high school GPA appears linear and slightly positive. This suggests that higher high school GPAs are associated with better exam scores.
+
+The effect of study is close to zero, similar to our OLS regression.
+
+The effect of work is close to zero across all values, suggesting no significant relationship between hours worked and exam scores in this model.
+
+The relationship between ACT score and exam scores is non-linear. The effect increases initially and then plateaus around ACT scores of 25-30. This indicates diminishing returns to very high ACT scores.
+
+Comparing our OLS model and our GAM models; Both OLS and GAM models suggest that hours studied per week does not have a significant impact on exam scores. This is also true for hours worked per week. Both OLS models and GAM models indicate a strong positive relationship between College GPA, High school GPA and ACT score with Final exam scores.
+
+## 4. Machine learning methods
+
+```{r, include=FALSE}
+
+library("randomForest")
+library("randomForestExplainer")
+```
+
+This section is dedicated to using machine learning to further analyse variable importance. @fig-ml1 and @fig-ml2 show the variable importance from a random forest model. They use 2 metrics; Mean decrease in gini, and Mean decrease in accuracy.
+
+```{r, echo=FALSE}
+#| fig-cap:  "Variable importance (Accuracy)"
+#| label: fig-ml1
+
+set.seed(123)  
+econ_rf <- randomForest(
+  score ~ .,               
+  data = clean_econ_test,  
+  ntree = 500,             
+  mtry = sqrt(ncol(clean_econ_test) - 1),  
+  importance = TRUE      
+)
+
+varImpPlot(econ_rf, type = 1, main = "Variable Importance (Accuracy)")
+
+```
+
+@fig-ml1 ranks variables based on the mean decrease in accuracy. This quantifies how much the prediction error (MSE) increases if a variable is removed.
+
+College GPA emerges as the most important predictor, with a significant impact on model accuracy (over 50%). ACT composite score, ACT math score and high school GPA are also highly important. If the student had taken calculus, ACT English score and math quiz score has moderate importance. Hours studied, hours worked and attendance measures all show minimal contributions toward model accuracy, meaning they have limited predictive power. Age and if the mother or father had a college Degree have almost no impact, meaning they are negligible predictors.
+
+```{r, echo=FALSE}
+#| fig-cap:  "Variable importance (Gini)"
+#| label: fig-ml2
+
+varImpPlot(econ_rf, type = 2, main = "Variable Importance (Gini)")
+```
+
+@fig-ml2 ranks variables according to their mean decrease in Gini Index. This is a measure of node impurity in classification trees.
+
+College GPA is by far the most important predictor, making it crucial for determining final exam scores. Act composite score and ACT math score are the next most important, followed by high school GPA and whether or not the student took calculus. Variables like gender, hours worked, and attendance have lower importance, meaning their role is minimal in predicting final exam scores. Age and attbad appear to have negligible importance in reducing node impurity.
+
+Our findings here align with the OLS and GAM models, where College GPA, ACT composite score and High school GPA emerge as the most significant predictors. Both the Gini and accuracy metrics point to similar variable ranking, increasing confidence in the robustness of these results.
+
+## 5. Conclusion
+
+Across all models, College GPA is the most significant predictor of final exam scores. Both OLS and GAMs have shown a strong positive relationship. Diminishing returns were found at the highest GPA levels through GAMs and Random forests. High school GPA was a moderately important predictor. It contributed positively and linearly to scores. Both of these factors underscore the importance of academic preparation in final exam score for economics students. ACT composite score was also consistently significant, with GAMs highlighting diminishing returns at higher ACT levels. ACT math score showed strong predictive power in the random forests model, showing the importance of mathematic aptitude when under taking an economics course. Neither study hours, nor hours worked showed significant relationships with exam scores. This prompts further investigation to see if this is truly the case. Students who had taken calculus performed better on average, as is shown by our OLS model and its moderate importance in the Random Forest model. Gender, attendance, parental education all exhibited weak effects. Gender displayed a small positive effect in our OLS model, however it did not appear a significant factor in either our GAM or random forest models.
+
+## References

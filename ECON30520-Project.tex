@@ -1,0 +1,965 @@
+% Options for packages loaded elsewhere
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+  letterpaper,
+  DIV=11,
+  numbers=noendperiod]{scrartcl}
+\usepackage{xcolor}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+% Make \paragraph and \subparagraph free-standing
+\makeatletter
+\ifx\paragraph\undefined\else
+  \let\oldparagraph\paragraph
+  \renewcommand{\paragraph}{
+    \@ifstar
+      \xxxParagraphStar
+      \xxxParagraphNoStar
+  }
+  \newcommand{\xxxParagraphStar}[1]{\oldparagraph*{#1}\mbox{}}
+  \newcommand{\xxxParagraphNoStar}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+  \let\oldsubparagraph\subparagraph
+  \renewcommand{\subparagraph}{
+    \@ifstar
+      \xxxSubParagraphStar
+      \xxxSubParagraphNoStar
+  }
+  \newcommand{\xxxSubParagraphStar}[1]{\oldsubparagraph*{#1}\mbox{}}
+  \newcommand{\xxxSubParagraphNoStar}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+\makeatother
+
+
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+
+
+% definitions for citeproc citations
+\NewDocumentCommand\citeproctext{}{}
+\NewDocumentCommand\citeproc{mm}{%
+  \begingroup\def\citeproctext{#2}\cite{#1}\endgroup}
+\makeatletter
+ % allow citations to break across lines
+ \let\@cite@ofmt\@firstofone
+ % avoid brackets around text for \cite:
+ \def\@biblabel#1{}
+ \def\@cite#1#2{{#1\if@tempswa , #2\fi}}
+\makeatother
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newenvironment{CSLReferences}[2] % #1 hanging-indent, #2 entry-spacing
+ {\begin{list}{}{%
+  \setlength{\itemindent}{0pt}
+  \setlength{\leftmargin}{0pt}
+  \setlength{\parsep}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+   \setlength{\leftmargin}{\cslhangindent}
+   \setlength{\itemindent}{-1\cslhangindent}
+  \fi
+  % set entry spacing
+  \setlength{\itemsep}{#2\baselineskip}}}
+ {\end{list}}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{\hfill\break\parbox[t]{\linewidth}{\strut\ignorespaces#1\strut}}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{\strut#1\strut}}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+
+
+
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+
+
+
+ 
+
+
+\usepackage{float}
+\usepackage{tabularray}
+\usepackage[normalem]{ulem}
+\usepackage{graphicx}
+\UseTblrLibrary{booktabs}
+\UseTblrLibrary{rotating}
+\UseTblrLibrary{siunitx}
+\NewTableCommand{\tinytableDefineColor}[3]{\definecolor{#1}{#2}{#3}}
+\newcommand{\tinytableTabularrayUnderline}[1]{\underline{#1}}
+\newcommand{\tinytableTabularrayStrikeout}[1]{\sout{#1}}
+\KOMAoption{captions}{tableheading}
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\AtBeginDocument{%
+\ifdefined\contentsname
+  \renewcommand*\contentsname{Table of contents}
+\else
+  \newcommand\contentsname{Table of contents}
+\fi
+\ifdefined\listfigurename
+  \renewcommand*\listfigurename{List of Figures}
+\else
+  \newcommand\listfigurename{List of Figures}
+\fi
+\ifdefined\listtablename
+  \renewcommand*\listtablename{List of Tables}
+\else
+  \newcommand\listtablename{List of Tables}
+\fi
+\ifdefined\figurename
+  \renewcommand*\figurename{Figure}
+\else
+  \newcommand\figurename{Figure}
+\fi
+\ifdefined\tablename
+  \renewcommand*\tablename{Table}
+\else
+  \newcommand\tablename{Table}
+\fi
+}
+\@ifpackageloaded{float}{}{\usepackage{float}}
+\floatstyle{ruled}
+\@ifundefined{c@chapter}{\newfloat{codelisting}{h}{lop}}{\newfloat{codelisting}{h}{lop}[chapter]}
+\floatname{codelisting}{Listing}
+\newcommand*\listoflistings{\listof{codelisting}{List of Listings}}
+\makeatother
+\makeatletter
+\makeatother
+\makeatletter
+\@ifpackageloaded{caption}{}{\usepackage{caption}}
+\@ifpackageloaded{subcaption}{}{\usepackage{subcaption}}
+\makeatother
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={The Determinants of Economics Students' Final Score},
+  pdfauthor={Ronan Moran},
+  colorlinks=true,
+  linkcolor={blue},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={Blue},
+  pdfcreator={LaTeX via pandoc}}
+
+
+\title{The Determinants of Economics Students' Final Score}
+\author{Ronan Moran}
+\date{}
+\begin{document}
+\maketitle
+
+
+\subsection{1. Introduction}\label{introduction}
+
+The intention of this journal entry is to find the determinants of
+Students' final exam scores within the field of economics. It has been
+found that the biggest contributors to Students final exam scores are
+College GPA, high school GPA and ACT composite scores while factors such
+as gender, attendance and parental education played an insignificant
+role in contributing to student's final exam scores.
+
+This paper is split into 3 main parts; Variable insight, which includes
+a summary of variables and R functions used for the reader to gain an
+intuition of the raw data. Next is our regression section, where OLS
+methods and GAMs were used to determine the associated effects of each
+variable on the dependent variable. Finally is a section dedicated to
+machine learning, where the function random forests was used to
+determine the importance of the various variables used in this study.
+
+From conducting scholarly research, it was apparent that Gender, high
+school GPA and education level of the parents were seen as the main
+contributing factors to exam score (Erdem, Senturk, and Arslan (2008)) .
+This paper seeks to investigate the validity of this claim through
+various regression methods.
+
+\subsection{2. Variable insight}\label{variable-insight}
+
+\subsubsection{2.1 Variables and R
+functions}\label{variables-and-r-functions}
+
+The data was attained from an anonymous college in the United States.
+There are 856 observations total, with 17 variables. The variables
+collected are described in the
+\phantomsection\label{list}\hyperref[list]{list of variables}. The
+column `Variable code' describes the code which was assigned to each
+variable, which will correspond with each beta value in our
+Table~\ref{tbl-regressions}. The variable description clarifies the
+detail of the variable, and the variable type briefly describes the role
+of the variable in the study. Our variable of interest, i.e.~the
+dependent variable of the study is `score'. Below,
+Table~\ref{tbl-custom-2} lists the mean, standard deviation (SD), the
+minimum value, the median value, and the max value of each of the
+variables in the data set. It also has a histogram assigned to each
+variable which shows the distribution of the sample relative to each
+variable. In Table~\ref{tbl-custom-2}, the variables econhs, male,
+calculus, attexc, attgood, fathcoll, mothcoll were all left out as
+because they are binary variables, the information displayed would be
+less insightful. Table~\ref{tbl-correlation} is a list of correlation
+coefficients with the intention of challenging intuition before
+regressing with the data. Figure~\ref{fig-patchwork} is a collection a
+graphs plotting each binary variable against the final score of
+economics students. Finally, Figure~\ref{fig-mutate} graphs `attbad', a
+newly created variable (which is explained below), against the final
+score.
+
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\caption{List of variables \{\#list\}.}\tabularnewline
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable code
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable type
+\end{minipage} \\
+\midrule\noalign{}
+\endfirsthead
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+Variable code
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable description
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Variable type
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+age & Age in years & Independent, Continuous \\
+work & Hours worked per week & Independent, Continuous \\
+study & Hours studying per week & Independent, Continuous \\
+econhs & If the student did economics in high school & Independent,
+Factor; `Yes' indicates the student did economics in high school \\
+colgpa & Student's college GPA at the beginning of the semester &
+Independent, Ordinal; 0-4 \\
+hsgpa & Student's high school GPA & Independent, Ordinal; 0-4 \\
+acteng & Student's ACT English score & Independent, Ordinal; 1-36 \\
+actmth & ACT math score & Independent, Ordinal; 1-36 \\
+act & Student's composite ACT score & Independent, Ordinal; 1-36 \\
+mathscr & Student's score on a math quiz & Independent,~Ordinal; 0-10 \\
+male & Gender of the student & Independent, Factor; `male' indicates the
+participant is male, `Female' indicates participant is female \\
+calculus & If the student had taken a calculus course & Independent,
+Factor; `Yes' indicates the participant took a calculus course \\
+attexc & If the student's attendance was excellent & Independent,
+Factor; `Yes' indicates the participants attendance was excellent \\
+attgood & If the student's past attendance was good & Independent,
+Factor; `Yes' indicates the participants attendance was good \\
+fathcoll & If the student's father had a bachelors degree &
+Independent,~Factor; `Yes' indicates that the participants father had a
+bachelors degree \\
+mothcoll & If student's mother had a bachelors degree & Independent,
+Factor; `Yes' indicates that the participants mother had a bachelors
+degree \\
+score & Course score & Dependent, Ordinal; 0-100, in percent. \\
+attbad & Student's attendance was less than `good' & Independent,
+Factor; Yes indicates attendance was neither `good' nor `excellent' \\
+\end{longtable}
+
+The R function `dplyr' was used in our study to tidy our data. The
+`mutate' function was used to convert binary variables into factor
+variables. The purpose of this is to improve interpretation by
+preventing R from treating it as a continuous numeric variable, instead
+treating it as a categorical variable where one level (e.g.~`Yes')
+becomes the reference level, and the coefficient represents the effect
+of the other level, relative to the reference. Dplyr was also used to
+arrange the data so that `score', our variable of interest, appears
+first. Again, it was used to filter our the binary variables from
+appearing on our summary table. A new variable called `attbad', using
+the mutate function, was created, which indicates the student's
+attendance was neither good nor excellent. This was done by assigning a
+`yes' value if both `attexc' and `attgood' had a `No' value. The purpose
+of this variable was to reveal how students with worse attendance than
+`good' did on their final scores. Dplyr was also used to remove any rows
+with `NA' values in order to keep our data consistent and usable with R
+functions.
+
+\subsubsection{2.2 Tables and graphs}\label{tables-and-graphs}
+
+\begin{table}
+
+\caption{\label{tbl-custom-2}Data summary table}
+
+\centering{
+
+\centering
+\begin{tblr}[         %% tabularray outer open
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+column{1}={halign=l,},
+column{2}={halign=l,},
+column{3}={halign=l,},
+column{4}={halign=l,},
+column{5}={halign=l,},
+column{6}={halign=l,},
+column{7}={halign=l,},
+column{8}={halign=l,},
+column{9}={halign=l,},
+}                     %% tabularray inner close
+\toprule
+& Unique & Missing Pct. & Mean & SD & Min & Median & Max & Histogram \\ \midrule %% TinyTableHeader
+age & 9 & 0 & 19.4 & 0.9 & 18.0 & 19.0 & 29.0 & \includegraphics[height=1em]{tinytable_assets/idzpjga57gl7ai86cvcze5.png} \\
+work & 44 & 0 & 8.6 & 9.2 & 0.0 & 8.0 & 37.5 & \includegraphics[height=1em]{tinytable_assets/idi47y1wiutekyshq0uvn0.png} \\
+study & 52 & 0 & 13.9 & 7.8 & 0.0 & 12.0 & 50.0 & \includegraphics[height=1em]{tinytable_assets/idtiw5st1jm7akhez7sb7s.png} \\
+colgpa & 612 & 0 & 2.8 & 0.5 & 0.9 & 2.8 & 4.0 & \includegraphics[height=1em]{tinytable_assets/iddiwv9o1ywpttyf4p9fpi.png} \\
+hsgpa & 531 & 0 & 3.3 & 0.3 & 2.4 & 3.3 & 4.3 & \includegraphics[height=1em]{tinytable_assets/id7q43jm4wxba6576oplly.png} \\
+acteng & 24 & 5 & 22.6 & 3.8 & 12.0 & 23.0 & 34.0 & \includegraphics[height=1em]{tinytable_assets/id98b2hlvhti0pwd0fs5fc.png} \\
+actmth & 24 & 5 & 23.2 & 3.8 & 12.0 & 23.0 & 36.0 & \includegraphics[height=1em]{tinytable_assets/idcmkfpxvrmnr7iramer3r.png} \\
+act & 21 & 5 & 23.1 & 3.3 & 13.0 & 23.0 & 33.0 & \includegraphics[height=1em]{tinytable_assets/ido1yhkosrcwco2xa33rog.png} \\
+mathscr & 11 & 0 & 7.9 & 1.7 & 0.0 & 8.0 & 10.0 & \includegraphics[height=1em]{tinytable_assets/idd4gerbd0mwb2keu1zyu5.png} \\
+score & 149 & 0 & 72.6 & 13.4 & 19.5 & 74.2 & 98.4 & \includegraphics[height=1em]{tinytable_assets/id25w0cxki005j13hkmvrz.png} \\
+\bottomrule
+\end{tblr}
+
+}
+
+\end{table}%
+
+The summary table provides an overview of the key statistics for the
+variables in the dataset. The ages of participants range from 18 to 29
+years, with a mean age of 19.4 and a relatively small standard deviation
+(SD) of 0.9, indicating most participants are close to the average age.
+Hours worked per week vary significantly, ranging from 0 to 37.5 hours,
+with a mean of 8.6 hours and a high SD of 9.2, suggesting substantial
+variation in work hours. Study hours per week range from 0 to 50, with a
+mean of 13.9 and an SD of 7.8. The wide range and higher SD indicate
+diverse study habits among participants. College GPAs range from 0.9 to
+4.0, with a mean of 2.8 and a low SD of 0.5, showing that most GPAs
+cluster near the mean. High school GPAs range from 2.4 to 4.3, with a
+mean of 3.3 and an SD of 0.3, indicating less variability than college
+GPA. ACT English scores range from 12 to 34, with a mean of 22.6 and an
+SD of 3.8, reflecting moderate variability in English performance. ACT
+Math scores range from 12 to 36, with a mean of 23.2 and an SD of 3.8,
+suggesting a similar variability as ACT English scores. Composite ACT
+scores range from 13 to 33, with a mean of 23.1 and an SD of 3.3,
+indicating consistent performance across participants. Math quiz scores
+range from 0 to 10, with a mean of 7.9 and an SD of 1.7, showing
+relatively high performance on the math quiz. Final course scores range
+widely, from 19.5 to 98.4, with a mean of 72.6 and an SD of 13.4,
+indicating significant variability in overall course performance. The
+histograms visually summarize the distribution of each variable, showing
+that variables like age, colgpa, and hsgpa are tightly clustered, while
+others like work and study exhibit a wider spread.
+
+\begin{table}
+
+\caption{\label{tbl-correlation}Correlation between variables}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/tbl-correlation-1.pdf}}
+
+}
+
+\end{table}%
+
+Table~\ref{tbl-correlation} displays the correlation coefficients and
+also shows scatter plots (lower triangle) and density plots (diagonal)
+for each pair of variables. The scatter plots illustrate how the
+variables relate to one another visually: for instance, we can see an
+upward ``cloud'' of points between final exam score and college GPA,
+consistent with their relatively strong positive correlation of 0.57. A
+similar upward trend is evident between final exam score and ACT math (r
+= 0.41) and between final exam score and ACT composite (r = 0.39).
+Meanwhile, variables like age display a weaker (and slightly negative)
+relationship with the final exam score, reflected by a fairly diffuse
+cloud of points and a small correlation (--0.07).\\
+\strut \\
+The density plots on the diagonal show how each variable is distributed
+overall. For example, final exam scores appear roughly unimodal
+(slightly skewed), while college GPA, ACT math, and ACT composite each
+cluster around a particular central value with varying spreads. In
+short, these visual patterns reinforce our numeric correlations: higher
+GPAs and stronger ACT scores tend to line up with higher final exam
+scores in economics. The regression analysis below will test whether
+these relationships hold once other factors are accounted for.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-patchwork-1.pdf}}
+
+}
+
+\caption{\label{fig-patchwork}Graph of factor variables}
+
+\end{figure}%
+
+The above graphs were created seeking to gain clarity on the
+relationship between each of the variables and final economics exam
+scores. Across all plots, there appears to be no substantial difference
+in the distribution of scores between the `no' and `yes' categories. All
+show similar spreads and central tendencies. This suggests minimal or no
+strong relationship with scores. These graphs imply that the variables
+investigated may not be strong predictors of student performance.
+Further statistical testing via regression analysis is required to
+verify these claims.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-mutate-1.pdf}}
+
+}
+
+\caption{\label{fig-mutate}Graph of `attbad'}
+
+\end{figure}%
+
+Figure~\ref{fig-mutate} visualises the relationship between the factor
+variable that was created, `attbad' and the dependent variable `score'.
+`No' indicates students whose attendance was at least `good' while `yes'
+indicates the student's attendance was at least worse than `good'. The
+Y-axis represents our `score' variable. The median, which is the
+horizontal line in the box, is slightly higher for students with `bad'
+attendance. This suggests that, on average, students with bad attendance
+have a slightly higher score. It should be noted however, that the
+difference does not appear to be dramatic. The interquartile range,
+i.e.~the height of the box, is slightly narrower for students with bad
+attendance. This suggests there is more variability in students with
+good or excellent attendance, however, this could be due to the sample
+size being smaller in those with `bad' attendance. For students with
+`good' or better attendance, there are several outliers below the 40\%
+mark, meaning some students who had good or better attendance still
+performed poorly on their final economics exams. This plot challenges
+the intuitive assumption that bad attendance automatically lead to worse
+scores on exams. As we can see, the difference is slight. `attbad' will
+be included in a regression to investigate the implications of this
+plot.
+
+\subsection{3. Regressions and analysis}\label{regressions-and-analysis}
+
+\subsubsection{3.1 Regression Methods}\label{regression-methods}
+
+In this section our chosen regression method is ordinary least squares
+(OLS). This method seeks to find the effect of the independent variable,
+denoted as `beta', by minimizing the sum of squared residuals.
+
+In matrix form, the OLS estimate is:
+
+\[
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
+\]
+
+where:
+
+\begin{itemize}
+\item
+  \(\mathbf{X}\) is the design matrix of predictors,
+\item
+  \(\mathbf{y}\) is the vector of outcomes,
+\item
+  \(\hat{\boldsymbol{\beta}}\) is the vector of estimated coefficients.
+\end{itemize}
+
+An important assumption of OLS to note:
+
+\[
+x_j, \mu = 0 
+\] where:
+
+\begin{itemize}
+\item
+  \(x_j\) represents the \(j\)-th predictor,
+\item
+  \(\mu\) is the error term,
+\item
+  \(\mathbb{E}[\mu \mid X] = 0\) means the error term has a mean of zero
+  given the predictors.
+\end{itemize}
+
+This means our Beta term and dependent variable must not both be
+correlated with our error term, or our correlation coefficients will be
+`biased' meaning, on average, our coefficients will be incorrect. By
+satisfying this assumption, we ensure that our betas show the accurate
+effect on the dependent variable on average.
+
+The predicted value of \(Y\), denoted as \(\hat{y}\), is calculated as:
+
+\(\hat{y} = \hat{\alpha} + \hat{\beta}_0 + \hat{\beta}_1 x_1 + \hat{\beta}_2 x_2 + \dots + \hat{\beta}_k x_k +\mu\)
+
+\begin{itemize}
+\item
+  \(\hat{\mathbf{y}}\): Vector of predicted values,
+\item
+  \(\mathbf{X}\): Design matrix of predictors,
+\item
+  \(\hat{\boldsymbol{\beta}}\): Vector of estimated regression
+  coefficients.
+\item
+  \(\boldsymbol{\mu}\): Vector of error terms.
+\end{itemize}
+
+Using this method, we will be able to speculate the associated effect of
+beta on our dependent variable on average.
+
+The method of selecting variables for the regression used was adding
+each variable one by one. If the \(R^2\) value decreased, it meant the
+model was a worse fit of the data, and it was removed. The variables
+left out from this method were; age, attexc, attgood, fathcoll,
+mothcoll, attbad. `attmath' and `atteng' were also left out in order to
+avoid multicollinearity, which would cause our model to lose predictive
+value. These variables were removed because they were highly correlated
+with `act' which is a function of both of these, and other scores.
+
+\subsubsection{3.2 Regressions and
+Interpretations}\label{regressions-and-interpretations}
+
+\begin{table}
+
+\caption{\label{tbl-regressions}Regressions}
+
+\centering{
+
+\centering
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={+ p \num{< 0.1}, * p \num{< 0.05}, ** p \num{< 0.01}, *** p \num{< 0.001}},
+note{ }={Standard Errors are in parentheses. Logs not applicable to our data. Gender coefficient is true when gender = male. Calculus variable is true if student has taken calculus.},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]Q[]},
+column{1}={halign=l,},
+column{2}={halign=c,},
+column{3}={halign=c,},
+column{4}={halign=c,},
+column{5}={halign=c,},
+column{6}={halign=c,},
+column{7}={halign=c,},
+column{8}={halign=c,},
+column{9}={halign=c,},
+hline{18}={1,2,3,4,5,6,7,8,9}{solid, 0.05em, black},
+}                     %% tabularray inner close
+\toprule
+& College GPA & Add HS GPA & Add Gender & Add Hours studied & Add hours worked & Add ACT Score & Add Math Score & Add If Calculus Taken \\ \midrule %% TinyTableHeader
+College GPA           & \num{14.323}*** & \num{12.667}*** & \num{12.713}*** & \num{12.734}*** & \num{12.398}*** & \num{11.556}*** & \num{11.489}*** & \num{11.327}*** \\
+& (\num{0.705})   & (\num{0.799})   & (\num{0.785})   & (\num{0.786})   & (\num{0.791})   & (\num{0.786})   & (\num{0.784})   & (\num{0.775})   \\
+HS GPA                &                  & \num{5.344}***  & \num{6.138}***  & \num{6.173}***  & \num{6.416}***  & \num{3.754}**   & \num{3.365}**   & \num{3.108}*    \\
+&                  & (\num{1.254})   & (\num{1.242})   & (\num{1.243})   & (\num{1.240})   & (\num{1.289})   & (\num{1.294})   & (\num{1.279})   \\
+Gender(male)          &                  &                  & \num{4.042}***  & \num{3.943}***  & \num{3.620}***  & \num{3.127}***  & \num{2.927}***  & \num{2.495}***  \\
+&                  &                  & (\num{0.747})   & (\num{0.755})   & (\num{0.760})   & (\num{0.748})   & (\num{0.750})   & (\num{0.746})   \\
+Hours Studied P/W     &                  &                  &                  & \num{-0.042}    & \num{-0.046}    & \num{0.006}     & \num{0.004}     & \num{0.003}     \\
+&                  &                  &                  & (\num{0.048})   & (\num{0.048})   & (\num{0.048})   & (\num{0.047})   & (\num{0.047})   \\
+Hours Worked P/W      &                  &                  &                  &                  & \num{-0.118}**  & \num{-0.132}*** & \num{-0.131}**  & \num{-0.131}*** \\
+&                  &                  &                  &                  & (\num{0.041})   & (\num{0.040})   & (\num{0.040})   & (\num{0.039})   \\
+Act Composite Score   &                  &                  &                  &                  &                  & \num{0.753}***  & \num{0.675}***  & \num{0.653}***  \\
+&                  &                  &                  &                  &                  & (\num{0.124})   & (\num{0.127})   & (\num{0.126})   \\
+Math score            &                  &                  &                  &                  &                  &                  & \num{0.565}*    & \num{0.268}     \\
+&                  &                  &                  &                  &                  &                  & (\num{0.225})   & (\num{0.231})   \\
+Taken calculus? (Yes) &                  &                  &                  &                  &                  &                  &                  & \num{3.763}***  \\
+&                  &                  &                  &                  &                  &                  &                  & (\num{0.813})   \\
+Num.Obs.              & \num{814}       & \num{814}       & \num{814}       & \num{814}       & \num{814}       & \num{814}       & \num{814}       & \num{814}       \\
+R2                    & \num{0.337}     & \num{0.351}     & \num{0.374}     & \num{0.375}     & \num{0.381}     & \num{0.408}     & \num{0.413}     & \num{0.428}     \\
+R2 Adj.               & \num{0.336}     & \num{0.350}     & \num{0.372}     & \num{0.372}     & \num{0.377}     & \num{0.404}     & \num{0.408}     & \num{0.423}     \\
+AIC                   & \num{6194.0}    & \num{6178.0}    & \num{6151.0}    & \num{6152.3}    & \num{6145.8}    & \num{6111.2}    & \num{6106.8}    & \num{6087.4}    \\
+\bottomrule
+\end{talltblr}
+
+}
+
+\end{table}%
+
+Table~\ref{tbl-regressions} show the results of several OLS regression.
+College GPA has a consistently strong positive association with final
+scores across all of the models. A one unit increase in college GPA is
+associated with an increase of 11.3 points, average, in exam scores when
+controlling for other variables. This coefficient is significant at the
+99\% level. This indicates that college academic performance is a
+critical determinant of success in economics exams.
+
+High school GPA also displays a positive relationship with final exam
+score. A one unit increase in High School GPA is associated with an
+increase of 5.3 points, on average, in exam scores when only College GPA
+is included in the regression. Interestingly, adding gender, hours
+studied and hours worked to this regression increases this coefficient
+to 6.4 points on average, indicating that these variables are negatively
+correlated with each other. Then, adding ACT score, math score and if
+the student took calculus brings the coefficient down to 3.1 points on
+average, indicating that these variables are positively correlated with
+each other. Although, this is only significant at the 90\% level.
+
+The variable `Gender' indicates that being male is associated with an
+increase in final score of 2.5 points, on average, compared to females
+when all other variables are controlled for. This is statistically
+significant at the 99\% confidence level.
+
+Hours studied per week show no statistically significant relationship
+with final scores, as the coefficient is near zero across all models.
+
+Hours worked per week have a significant negative relationship with exam
+scores. A one-hour increase in work is associated with a decrease in
+exam scores by .13 points on average when controlling for all other
+variables. This suggests that work commitments hinder academic
+performance.
+
+Math score shows a weak coefficient; a one unit increase in math score
+is associated with a an increase in final exam score of .57 on average
+when controlling for all variables except the calculus variable. In this
+regression, it is significant at the 90\% level. However, when
+controlling for if the student has taken calculus, this associated
+effect becomes weaker and loses statistical significance.
+
+Students who took calculus are associated with an increased score of
+3.76 points on average than those who did not, with a significance level
+at 99\%.
+
+The R squared and adjusted R squares values increase as more variables
+are added, suggesting that the model improved in fit and that no
+unnecessary variables were added. The final value is .423, meaning the
+model explains 42.3\% of the variance in final exam scores.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-modelplot1-1.pdf}}
+
+}
+
+\caption{\label{fig-modelplot1}Model plot of Regressions so far}
+
+\end{figure}%
+
+Figure~\ref{fig-modelplot1} summarises the coefficients relative to one
+another. It also displays their 95\% confidence intervals, allowing us
+to compare how the inclusion of different variables affects the
+estimated effects of predictors on economic student's final exam scores.
+
+Our main takeaway from these regressions are; Academic preparations such
+as college GPA, HS GPA, ACT composite score and calculus high indicators
+of exam performance. External factors like work commitments are
+associated with negative impacts on performance. Non-significant
+variables like hours studied per week warrant further investigation to
+understand their role in this data set.
+
+\subsubsection{3.3 Regression Diagnostics}\label{regression-diagnostics}
+
+Figure~\ref{fig-diagplot} below assess the assumptions of a linear
+regression model. Each plot assesses the model's performance and whether
+key assumptions are violated.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-diagplot-1.pdf}}
+
+}
+
+\caption{\label{fig-diagplot}Diagnostic plots}
+
+\end{figure}%
+
+The purpose of the residuals vs fitted plot (top left) is to check for
+non-linearity and constant variance, or homoskedasticity. The residuals
+are scattered around zero, however there is a slight curved pattern in
+the residuals indicating possible non-linearity in the relationship
+between predictors and the outcome. The spread of residuals is quite
+even, suggesting no strong evidence of heteroskedasticity (non constant
+variance).
+
+The purpose of the normal q-q plot (top right) is to check whether the
+residuals follow a normal distribution. Most points lie close to the
+diagonal line, suggesting that residuals are normal. There are some
+deviations at the tails, particularly observation 293, which may
+indicate potential outliers.
+
+The purpose of the scale-location plot is to check for homoskedasticity.
+The trend line is relatively and the spread of the points appears fairly
+consistent across fitted values. However, the downward slope of the
+trend line suggests a slight decrease in variance as fitted values
+increase, indicating mild heteroskedasticity.
+
+The residuals vs Leverage plot (bottom left) identifies influential
+points. Most point have low leverage, as indicated by their clustering
+near the left side of the plot. Observation 293 has higher leverage and
+could potentially be an influential point. Its standardised residual
+does not appear extreme, however, so its influence may be limited.
+
+From our findings we can conclude that the linearity assumption may be
+slightly violated due to the curve in the residuals vs fitted plot.
+There also may be mild heterskedasticity, but no severe violations. This
+means our coefficients may be slightly wrong.
+
+Observation 293 is removed from the model in Figure~\ref{fig-diagplot2}
+to analyse the difference to determine its effect.
+
+A general additive model is applies in Figure~\ref{fig-regressionsGAM}
+to address the possible non-linearity of our OLS regression.
+
+\begin{table}
+
+\caption{\label{tbl-regressions2}Regressions with and without leverage
+point}
+
+\centering{
+
+\centering
+\begin{talltblr}[         %% tabularray outer open
+entry=none,label=none,
+note{}={+ p \num{< 0.1}, * p \num{< 0.05}, ** p \num{< 0.01}, *** p \num{< 0.001}},
+note{ }={Standard Errors are in parentheses. Logs not applicable to our data. Gender coefficient is true when gender = male. Calculus variable is true if student has taken calculus.},
+]                     %% tabularray outer close
+{                     %% tabularray inner open
+colspec={Q[]Q[]Q[]},
+column{1}={halign=l,},
+column{2}={halign=c,},
+column{3}={halign=c,},
+hline{18}={1,2,3}{solid, 0.05em, black},
+}                     %% tabularray inner close
+\toprule
+& Highest leveredge point left in & Leveredge point taken out \\ \midrule %% TinyTableHeader
+College GPA           & \num{11.327}*** & \num{11.505}*** \\
+& (\num{0.775})   & (\num{0.773})   \\
+HS GPA                & \num{3.108}*    & \num{2.849}*    \\
+& (\num{1.279})   & (\num{1.276})   \\
+Gender(male)          & \num{2.495}***  & \num{2.550}***  \\
+& (\num{0.746})   & (\num{0.743})   \\
+Hours Studied P/W     & \num{0.003}     & \num{0.002}     \\
+& (\num{0.047})   & (\num{0.047})   \\
+Hours Worked P/W      & \num{-0.131}*** & \num{-0.133}*** \\
+& (\num{0.039})   & (\num{0.039})   \\
+Act Composite Score   & \num{0.653}***  & \num{0.639}***  \\
+& (\num{0.126})   & (\num{0.125})   \\
+Math score            & \num{0.268}     & \num{0.340}     \\
+& (\num{0.231})   & (\num{0.231})   \\
+Taken calculus? (Yes) & \num{3.763}***  & \num{3.630}***  \\
+& (\num{0.813})   & (\num{0.810})   \\
+Num.Obs.              & \num{814}       & \num{813}       \\
+R2                    & \num{0.428}     & \num{0.433}     \\
+R2 Adj.               & \num{0.423}     & \num{0.427}     \\
+\bottomrule
+\end{talltblr}
+
+}
+
+\end{table}%
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-diagplot2-1.pdf}}
+
+}
+
+\caption{\label{fig-diagplot2}Diagnostic plots with and without leverage
+point}
+
+\end{figure}%
+
+From Table~\ref{tbl-regressions2} we can see that the variables has
+slight change when taking out observation 293. However, as we can see
+from Figure~\ref{fig-diagplot2} the difference is mild and does not
+effect the overall takeaway of the regression.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-regressionsGAM-1.pdf}}
+
+}
+
+\caption{\label{fig-regressionsGAM}GAM regression smooth terms}
+
+\end{figure}%
+
+Figure~\ref{fig-regressionsGAM} shows partial effect plots. They display
+the relationship between the predictors ( `colgpa', `hsgpa', `study' ,
+`work', `act') and the dependent variable. The plots show how each
+predictor contributes to the dependent variable while allowing for
+non-linear relationships.
+
+The effect of college GPA is non-linear and strongly positive. As
+college GPA increases, the smooth effect increases substantially. This
+indicates that higher college GPAs are strongly associated with better
+exam scores.
+
+The effect of high school GPA appears linear and slightly positive. This
+suggests that higher high school GPAs are associated with better exam
+scores.
+
+The effect of study is close to zero, similar to our OLS regression.
+
+The effect of work is close to zero across all values, suggesting no
+significant relationship between hours worked and exam scores in this
+model.
+
+The relationship between ACT score and exam scores is non-linear. The
+effect increases initially and then plateaus around ACT scores of 25-30.
+This indicates diminishing returns to very high ACT scores.
+
+Comparing our OLS model and our GAM models; Both OLS and GAM models
+suggest that hours studied per week does not have a significant impact
+on exam scores. This is also true for hours worked per week. Both OLS
+models and GAM models indicate a strong positive relationship between
+College GPA, High school GPA and ACT score with Final exam scores.
+
+\subsection{4. Machine learning methods}\label{machine-learning-methods}
+
+This section is dedicated to using machine learning to further analyse
+variable importance. Figure~\ref{fig-ml1} and Figure~\ref{fig-ml2} show
+the variable importance from a random forest model. They use 2 metrics;
+Mean decrease in gini, and Mean decrease in accuracy.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-ml1-1.pdf}}
+
+}
+
+\caption{\label{fig-ml1}Variable importance (Accuracy)}
+
+\end{figure}%
+
+Figure~\ref{fig-ml1} ranks variables based on the mean decrease in
+accuracy. This quantifies how much the prediction error (MSE) increases
+if a variable is removed.
+
+College GPA emerges as the most important predictor, with a significant
+impact on model accuracy (over 50\%). ACT composite score, ACT math
+score and high school GPA are also highly important. If the student had
+taken calculus, ACT English score and math quiz score has moderate
+importance. Hours studied, hours worked and attendance measures all show
+minimal contributions toward model accuracy, meaning they have limited
+predictive power. Age and if the mother or father had a college Degree
+have almost no impact, meaning they are negligible predictors.
+
+\begin{figure}
+
+\centering{
+
+\pandocbounded{\includegraphics[keepaspectratio]{ECON30520-Project_files/figure-pdf/fig-ml2-1.pdf}}
+
+}
+
+\caption{\label{fig-ml2}Variable importance (Gini)}
+
+\end{figure}%
+
+Figure~\ref{fig-ml2} ranks variables according to their mean decrease in
+Gini Index. This is a measure of node impurity in classification trees.
+
+College GPA is by far the most important predictor, making it crucial
+for determining final exam scores. Act composite score and ACT math
+score are the next most important, followed by high school GPA and
+whether or not the student took calculus. Variables like gender, hours
+worked, and attendance have lower importance, meaning their role is
+minimal in predicting final exam scores. Age and attbad appear to have
+negligible importance in reducing node impurity.
+
+Our findings here align with the OLS and GAM models, where College GPA,
+ACT composite score and High school GPA emerge as the most significant
+predictors. Both the Gini and accuracy metrics point to similar variable
+ranking, increasing confidence in the robustness of these results.
+
+\subsection{5. Conclusion}\label{conclusion}
+
+Across all models, College GPA is the most significant predictor of
+final exam scores. Both OLS and GAMs have shown a strong positive
+relationship. Diminishing returns were found at the highest GPA levels
+through GAMs and Random forests. High school GPA was a moderately
+important predictor. It contributed positively and linearly to scores.
+Both of these factors underscore the importance of academic preparation
+in final exam score for economics students. ACT composite score was also
+consistently significant, with GAMs highlighting diminishing returns at
+higher ACT levels. ACT math score showed strong predictive power in the
+random forests model, showing the importance of mathematic aptitude when
+under taking an economics course. Neither study hours, nor hours worked
+showed significant relationships with exam scores. This prompts further
+investigation to see if this is truly the case. Students who had taken
+calculus performed better on average, as is shown by our OLS model and
+its moderate importance in the Random Forest model. Gender, attendance,
+parental education all exhibited weak effects. Gender displayed a small
+positive effect in our OLS model, however it did not appear a
+significant factor in either our GAM or random forest models.
+
+\subsection*{References}\label{references}
+\addcontentsline{toc}{subsection}{References}
+
+\phantomsection\label{refs}
+\begin{CSLReferences}{1}{0}
+\bibitem[\citeproctext]{ref-turkey}
+Erdem, Cumhur, Ismail Senturk, and Cem Kaan Arslan. 2008. {``The
+Socioeconomic Determinants of the University Entrance Exam Scores in
+Turkey.''} \emph{Int. J. Manage. Educ.} 2 (4): 357.
+
+\end{CSLReferences}
+
+
+
+
+\end{document}
